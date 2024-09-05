@@ -9,17 +9,18 @@ params:
     predictor: 'tb'
     predictor_min: 2.73
     predictor_max: 330.
-    tb_noise: 0.1
-    
+    tb_noise: 0.15
+
     predictor_error: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
-    
+    # predictor_error: [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
+
+    # regression type (linear or quadratic)
+    regression_type: 'quadratic'
+
     # surface layer measurement uncertainties, T, p, q
-    surface_error: [0.15, 100., .5e-3]
-    
+    surface_error: [0.2, 100., .5e-3]
+
     # retrieval specifications
     freq: [51.26, 52.28, 53.86, 54.94, 56.66, 57.30, 58.00]
 
     angle: [90]
-
-        
-            

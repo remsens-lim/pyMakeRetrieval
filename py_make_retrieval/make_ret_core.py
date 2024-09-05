@@ -17,7 +17,6 @@ from py_make_retrieval import ret
 from py_make_retrieval.plotting import plot_performance_2d
 
 
-
 class MakeRetrieval:
     r"""The core of making the retrieval from radiative transfer data', which
     contains all required parameters.
@@ -114,17 +113,21 @@ class MakeRetrieval:
                                             elevation_angle=self.angle_index,
                                             n_cloud_model=0,
                                             n_height=slice(0, -4),
-                                            ).drop_dims(['n_wet_delay_models', 'n_cloud_max'])
+                                            ).drop_dims(['n_wet_delay_models'])
 
             # filter out unreasonable data
+            # print(self.rt_dat.sizes)
             self.rt_dat = self.rt_dat.where(
-                (self.rt_dat.brightness_temperatures > self.specs['predictor_min']) &
-                (self.rt_dat.brightness_temperatures < self.specs['predictor_max']) &
+                (self.rt_dat.brightness_temperatures.min(dim='n_frequency') > self.specs['predictor_min']) &
+                (self.rt_dat.brightness_temperatures.max(dim='n_frequency') < self.specs['predictor_max']) &
                 (self.rt_dat.integrated_water_vapor > 0.01) &
                 (self.rt_dat.integrated_water_vapor < 80) &
+                # (self.rt_dat.atmosphere_temperature.min(dim='n_height') > self.specs['predictand_min']) &
+                # (self.rt_dat.atmosphere_temperature.max(dim='n_height') < self.specs['predictand_max']) &
                 (self.rt_dat.liquid_water_path < 1.5),
                 drop=True
             )
+            # print(self.rt_dat.sizes)
 
             self.height_grid = self.rt_dat.isel(n_date=0, elevation_angle=0,
                                                 n_frequency=0).height_grid
@@ -146,11 +149,11 @@ class MakeRetrieval:
 
                         # define input and output
                         x = self.rt_dat.brightness_temperatures.isel(n_frequency=freq_wo_x_index,
-                                                                     # elevation_angle=ang
+                                                                     elevation_angle=jj
                                                                      ).squeeze().values
 
                         y = self.rt_dat.isel(n_frequency=i_freq_index,
-                                             # elevation_angle=ang
+                                             elevation_angle=jj
                                              ).brightness_temperatures.squeeze().values
 
                         # add measurement noise to the brightness temperatures
@@ -176,7 +179,7 @@ class MakeRetrieval:
 
                         # test model
                         self.n_test, self.y_test_fil, self.pred_test, \
-                            self.bias, self.std = self.test_model()
+                            self.bias, self.std, self.rmse = self.test_model()
 
                         # plot retrieval performance
                         self.plot_retrieval_performance_1d(i_ang, ii, self.y_test_fil,
@@ -186,7 +189,7 @@ class MakeRetrieval:
                         # make file
                         data_mwr = self.make_mwr_pro_comp_file(self.coeff, self.const, self.bias,
                                                                self.std,
-                                                               i_ang=ang,
+                                                               i_ang=jj,
                                                                freq_wo_x=freq_wo_x)
                         self.mwr_pro_ret = ret.Ret(data_mwr)
 
@@ -197,7 +200,7 @@ class MakeRetrieval:
                         # define output file
                         self.output_file = f"output/{self.specs['site']}/{self.ret_type}_" \
                                            f"{self.specs['site']}_" \
-                                           f"no_surf_{str(int(i_ang))}_" \
+                                           f"no_surf_{str(int(i_ang*10))}_" \
                                            f"{str(ii).zfill(2)}.nc"
 
                         # make global attributes
@@ -241,11 +244,11 @@ class MakeRetrieval:
                         mu, _ = mu_calc(
                             self.height_grid.values,
                             self.rt_dat['atmosphere_temperature'].isel(
-                                n_date=kk, n_frequency=0).squeeze().values,
+                                n_date=kk).squeeze().values,
                             self.rt_dat['atmosphere_pressure'].isel(
-                                n_date=kk, n_frequency=0).squeeze().values,
+                                n_date=kk).squeeze().values,
                             self.rt_dat['atmosphere_humidity'].isel(
-                                n_date=kk, n_frequency=0).squeeze().values,
+                                n_date=kk).squeeze().values,
                             self.specs['freq'],
                             ang,
                             air_corr='sphere',
@@ -262,11 +265,11 @@ class MakeRetrieval:
 
                         if self.ret_type == 'iwv':
                             yyy.append(self.rt_dat.isel(
-                                n_date=kk, n_frequency=0
+                                n_date=kk
                             ).integrated_water_vapor.squeeze().values*airmf)
                         elif self.ret_type == 'lwp':
                             yyy.append(self.rt_dat.isel(
-                                n_date=kk, n_frequency=0
+                                n_date=kk
                             ).liquid_water_path.squeeze().values*airmf)
                         else:
                             raise ValueError("no valid ret_type")
@@ -283,19 +286,19 @@ class MakeRetrieval:
                         t_gr_noise = np.random.normal(0, 1., y.shape[0]
                                                       ) * self.specs['surface_error'][0]
                         t_gr = self.rt_dat.atmosphere_temperature_sfc.isel(
-                            n_frequency=0, elevation_angle=0
+                            elevation_angle=0
                         ).values.reshape(-1, 1) + t_gr_noise.reshape(-1, 1)
 
                         p_gr_noise = np.random.normal(0, 1., y.shape[0]
                                                       ) * self.specs['surface_error'][1]
                         p_gr = self.rt_dat.atmosphere_pressure_sfc.isel(
-                            n_frequency=0, elevation_angle=0
+                            elevation_angle=0
                         ).values.reshape(-1, 1) + p_gr_noise.reshape(-1, 1)
 
                         q_gr_noise = np.random.normal(0, 1., y.shape[0]
                                                       ) * self.specs['surface_error'][2]
                         q_gr = self.rt_dat.atmosphere_humidity_sfc.isel(
-                            n_frequency=0, elevation_angle=0
+                            elevation_angle=0
                         ).values.reshape(-1, 1) + q_gr_noise.reshape(-1, 1)
 
                         x_new = np.concatenate([x_noise, t_gr, p_gr, q_gr], axis=1)
@@ -320,7 +323,7 @@ class MakeRetrieval:
 
                     # test model
                     self.n_test, self.y_test_fil, self.pred_test, \
-                        self.bias, self.std = self.test_model()
+                        self.bias, self.std, self.rmse = self.test_model()
 
                     # plot retrieval performance
                     self.plot_retrieval_performance_1d(ang, ii, self.y_test_fil, self.pred_test,
@@ -383,19 +386,19 @@ class MakeRetrieval:
                         t_gr_noise = np.random.normal(0, 1., y.shape[0]
                                                       ) * self.specs['surface_error'][0]
                         t_gr = self.rt_dat.atmosphere_temperature_sfc.isel(
-                            n_frequency=0, elevation_angle=0
+                            elevation_angle=0
                         ).values.reshape(-1, 1) + t_gr_noise.reshape(-1, 1)
 
                         p_gr_noise = np.random.normal(0, 1., y.shape[0]
                                                       ) * self.specs['surface_error'][1]
                         p_gr = self.rt_dat.atmosphere_pressure_sfc.isel(
-                            n_frequency=0, elevation_angle=0
+                            elevation_angle=0
                         ).values.reshape(-1, 1) + p_gr_noise.reshape(-1, 1)
 
                         q_gr_noise = np.random.normal(0, 1., y.shape[0]
                                                       ) * self.specs['surface_error'][2]
                         q_gr = self.rt_dat.atmosphere_humidity_sfc.isel(
-                            n_frequency=0, elevation_angle=0
+                            elevation_angle=0
                         ).values.reshape(-1, 1) + q_gr_noise.reshape(-1, 1)
 
                         x_new = np.concatenate([x_noise, t_gr, p_gr, q_gr], axis=1)
@@ -420,7 +423,7 @@ class MakeRetrieval:
 
                     # test model
                     self.n_test, self.y_test_fil, self.pred_test, \
-                        self.bias, self.std = self.test_model_profile()
+                        self.bias, self.std, self.rmse = self.test_model_profile()
 
                     # plot retrieval performance
                     # self.plot_tbx_retrieval_performance(ang, ii, self.y_test, self.pred_test,
@@ -489,7 +492,7 @@ class MakeRetrieval:
                                             elevation_angle=angle_index,
                                             n_cloud_model=0,
                                             n_height=slice(0, -4),
-                                            ).drop_dims(['n_wet_delay_models', 'n_cloud_max'])
+                                            ).drop_dims(['n_wet_delay_models'])
             self.frequency = self.rt_dat.isel(n_date=0).frequency.values
 
             # filter out unreasonable data
@@ -583,7 +586,7 @@ class MakeRetrieval:
 
             # test model
             self.n_test, self.y_test_fil, self.pred_test, \
-                self.bias, self.std = self.test_model_profile()
+                self.bias, self.std, self.rmse = self.test_model_profile()
 
             # make file
             data_mwr = self.make_mwr_pro_comp_file(
@@ -629,8 +632,9 @@ class MakeRetrieval:
             np.array(self.x_test[i_test[0], :]) * np.asarray(self.coeff), axis=1)
         bias = np.sum(np.subtract(pred_test, y_test_fil)) / n_test
         std = np.std(np.subtract(pred_test, y_test_fil))
+        rmse = np.sqrt(np.mean(np.subtract(pred_test, y_test_fil)**2))
 
-        return n_test, y_test_fil, pred_test, bias, std
+        return n_test, y_test_fil, pred_test, bias, std, rmse
 
     def test_model_profile(self):
         n_test = []
@@ -638,6 +642,7 @@ class MakeRetrieval:
         pred_test = []
         bias = []
         std = []
+        rmse = []
 
         for hh in range(len(self.height_grid)):
             if self.ret_type == 'hpt':
@@ -658,7 +663,9 @@ class MakeRetrieval:
             bias.append(np.sum(np.subtract(pred_test, y_test_fil)) / i_test[0].shape[0])
             std.append(np.std(np.subtract(pred_test, y_test_fil)))
 
-        return n_test, y_test_fil, pred_test, bias, std
+            rmse.append(np.sqrt(np.mean(np.subtract(pred_test, y_test_fil)**2)))
+
+        return n_test, y_test_fil, pred_test, bias, std, rmse
 
     def make_linear_regression(self):
         i_train = np.where(
@@ -739,6 +746,8 @@ class MakeRetrieval:
             'predictor_err': np.asarray(self.specs['predictor_error']),
             'predictand_err': np.asarray(std),
             'predictand_err_sys': np.asarray(bias),
+            'predictand_rmse': np.asarray(self.rmse),
+            'predictand_r_2': np.asarray(self.r_2),
             'coefficient_mvr': np.asarray(coeff).T,
             'offset_mvr': np.asarray(const),
         }
@@ -796,7 +805,7 @@ class MakeRetrieval:
 
         global_attributes['retrieval_version'] = self.specs['retrieval_version']
         global_attributes['surface_mode'] = self.specs['surf_mode']
-        global_attributes['regression_type'] = 'linear'
+        global_attributes['regression_type'] = self.specs['regression_type']
 
         global_attributes['cloudy_clear'] = 'all'
         global_attributes['cloud_diagnosis'] = 'Karstens_1994'
@@ -883,7 +892,7 @@ class MakeRetrieval:
         if self.ret_type == 'tbx':
             png_file = f"output/{self.specs['site']}/" \
                        f"{self.ret_type}_{self.specs['site']}" \
-                       f"_no_surf_{str(int(ang))}_{str(ii).zfill(2)}.png"
+                       f"_no_surf_{str(int(ang*10))}_{str(ii).zfill(2)}.png"
         else:
             png_file = f"output/{self.specs['site']}/" \
                        f"{self.ret_type}_{self.specs['site']}_" \

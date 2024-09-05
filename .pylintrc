@@ -19,3 +19,4 @@ disable =
 
 [MASTER]
 max-branches=23
+max-line-length=110

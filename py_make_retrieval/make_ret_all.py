@@ -31,11 +31,12 @@ def main(args):
             rt_file_list1.append(rt_file_list0)
 
     rt_file_list = np.concatenate(rt_file_list1)
+    print(rt_file_list)
 
     # concat radiative transfer files
     rt_files = []
     for file in rt_file_list:
-        rt_files.append(xr.open_dataset(file))
+        rt_files.append(xr.open_dataset(file).drop_dims('n_cloud_max'))
 
     rt_data = xr.concat(rt_files, dim='n_date', data_vars='different')
     rt_data = rt_data.dropna(dim='n_date')
@@ -58,7 +59,7 @@ def main(args):
 
             results = []
             for ret_spec in ret_specs:
-                rt_data = rt_data.interp(
+                rt_dat = rt_data.interp(
                     elevation_angle=np.sort(
                         np.append(
                             rt_data.elevation_angle.values,
@@ -70,13 +71,13 @@ def main(args):
                 ret_specs[ret_spec].update(config)
 
                 results.append(MakeRetrieval(ret_specs[ret_spec],
-                                             rt_data,
+                                             rt_dat,
                                              ret_type,
                                              )
                                )
         else:
-            if config['angle'] not in rt_data.elevation_angle.values:
-                rt_data = rt_data.interp(
+            if not set(config['angle']) <= set(rt_data.elevation_angle.values):
+                rt_dat = rt_data.interp(
                     elevation_angle=np.sort(
                         np.append(
                             rt_data.elevation_angle.values,
@@ -84,8 +85,11 @@ def main(args):
                         )
                     ), method='cubic'
                 )
+            else:
+                rt_dat = rt_data
+
 
             MakeRetrieval(config,
-                          rt_data,
+                          rt_dat,
                           ret_type,
                           )

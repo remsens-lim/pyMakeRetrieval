@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyMaekRetrieval"
-version = "0.0.1"
+version = "1.2.0"
 authors = [
   { name="Andreas Foth", email="author@example.com" },
 ]
@@ -15,6 +15,14 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+]
+dependencies = [
+  "numpy",
+  "xarray",
+  "netcdf4",
+  "scikit-learn",
+  "pyyaml",
+  "matplotlib",
 ]
 
 [project.urls]

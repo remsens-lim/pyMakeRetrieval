@@ -13,6 +13,6 @@ params:
 
     # version
     retrieval_version: 'no_surf'
-    
+
     # surface mode (surface or no_surface)
     surf_mode: 'no_surface'

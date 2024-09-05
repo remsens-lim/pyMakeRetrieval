@@ -88,7 +88,6 @@ class Ret:
 
 def save_ret(ret: Ret, output_file: str, att: dict, data_type: str) -> None:
     """Saves the Ret file."""
-
     if data_type == 'tpb':
         dims = {
             "n_freq": len(ret.data["freq"][:]),
@@ -96,7 +95,7 @@ def save_ret(ret: Ret, output_file: str, att: dict, data_type: str) -> None:
             "n_height_grid": len(ret.data["height_grid"][:]),
             "n_angles": len(ret.data["elevation_predictor"][:]),
             "n_prr_err": len(ret.data["height_grid"][:]),
-            "n_prr_errs": 3,
+            "n_prrs_err": 1,
             "n_coeff": len(ret.data["coefficient_mvr"][:, 0]),
         }
     elif data_type in ('tpt', 'hpt'):
@@ -104,14 +103,14 @@ def save_ret(ret: Ret, output_file: str, att: dict, data_type: str) -> None:
             "n_freq_ret": len(ret.data["freq"][:]),
             "n_height_grid": len(ret.data["height_grid"][:]),
             "n_prr_err": len(ret.data["height_grid"][:]),
-            "n_prr_errs": 3,
+            "n_prrs_err": 3,
             "n_coeff": len(ret.data["coefficient_mvr"][:, 0]),
         }
     elif data_type in ("tbx", "iwv", "lwp"):
         dims = {
             "n_freq_ret": len(ret.data["freq"][:]),
             "n_prr_err": len(ret.data["freq"][:].T)+1,
-            "n_prr_errs": 3,
+            "n_prrs_err": 3,
             "n_coeff": len(ret.data["coefficient_mvr"][:]),
         }
 

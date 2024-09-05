@@ -26,12 +26,12 @@ def _parse_args(args):
         default="process",
         help="Command to execute.",
     )
-    group = parser.add_argument_group(title="Retreival type")
+    group = parser.add_argument_group(title="Retrieval type")
     group.add_argument(
         "-r",
         "--ret",
         required=True,
-        help="Retreival type to be created, e.g. lwp",
+        help="Retrieval type to be created, e.g. lwp",
         type=str,
     )
 

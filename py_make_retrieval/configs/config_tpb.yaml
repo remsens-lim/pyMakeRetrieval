@@ -9,7 +9,10 @@ params:
     predictor: 'tb'
     predictor_min: 2.73
     predictor_max: 330.
-    tb_noise: 0.1
+    tb_noise: 0.15
+
+    # regression type (currently only linear)
+    regression_type: 'linear'
 
     # surface layer measurement uncertainties, T, p, q
-    surface_error: [0.15, 100., .5e-3]
+    surface_error: [0.2] # , 100., .5e-3]

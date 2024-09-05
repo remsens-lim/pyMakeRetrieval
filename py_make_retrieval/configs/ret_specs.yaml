@@ -8,26 +8,26 @@
     handle: '7-10'
     predictor_error: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
 
-#4_freqs_10_angles_with_zenith:
-#    freq_z: []  # HATPRO, T
-#    freq_bl: [54.94, 56.66, 57.30, 58.00]  # HATPRO, T
-#    multi_angles: [90. , 30. , 19.2, 14.4, 11.4,  8.4,  6.6,  5.4,  4.8,  4.2]
-#    name: '4 freqs, 10 angles with zenith'
-#    handle: '4-10'
-#    predictor_error: [0.3, 0.3, 0.3, 0.3]
-#
-#7_freqs_9_angles_without_zenith:
-#    freq_z: []  # HATPRO, T
-#    freq_bl: [51.26, 52.28, 53.86, 54.94, 56.66, 57.30, 58.00]  # HATPRO, T
-#    multi_angles: [30. , 19.2, 14.4, 11.4,  8.4,  6.6,  5.4,  4.8,  4.2]
-#    name: '7 freqs, 9 angles without zenith'
-#    handle: '7-9'
-#    predictor_error: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
-#
-#4_freqs_9_angles_without_zenith:
-#    freq_z: []  # HATPRO, T
-#    freq_bl: [54.94, 56.66, 57.30, 58.00]  # HATPRO, T
-#    multi_angles: [30. , 19.2, 14.4, 11.4,  8.4,  6.6,  5.4,  4.8,  4.2]
-#    name: '4 freqs, 9 angles without zenith'
-#    handle: '4-9'
-#    predictor_error: [0.3, 0.3, 0.3, 0.3]
+4_freqs_10_angles_with_zenith:
+   freq_z: []  # HATPRO, T
+   freq_bl: [54.94, 56.66, 57.30, 58.00]  # HATPRO, T
+   multi_angles: [90. , 30. , 19.2, 14.4, 11.4,  8.4,  6.6,  5.4,  4.8,  4.2]
+   name: '4 freqs, 10 angles with zenith'
+   handle: '4-10'
+   predictor_error: [0.3, 0.3, 0.3, 0.3]
+
+7_freqs_9_angles_without_zenith:
+   freq_z: []  # HATPRO, T
+   freq_bl: [51.26, 52.28, 53.86, 54.94, 56.66, 57.30, 58.00]  # HATPRO, T
+   multi_angles: [30. , 19.2, 14.4, 11.4,  8.4,  6.6,  5.4,  4.8,  4.2]
+   name: '7 freqs, 9 angles without zenith'
+   handle: '7-9'
+   predictor_error: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
+
+4_freqs_9_angles_without_zenith:
+   freq_z: []  # HATPRO, T
+   freq_bl: [54.94, 56.66, 57.30, 58.00]  # HATPRO, T
+   multi_angles: [30. , 19.2, 14.4, 11.4,  8.4,  6.6,  5.4,  4.8,  4.2]
+   name: '4 freqs, 9 angles without zenith'
+   handle: '4-9'
+   predictor_error: [0.3, 0.3, 0.3, 0.3]

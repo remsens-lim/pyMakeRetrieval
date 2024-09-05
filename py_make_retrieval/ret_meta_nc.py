@@ -184,6 +184,14 @@ ATTRIBUTES_tpb = {
         long_name="bias error of predictand",
         units="K",
     ),
+    "predictand_rmse": MetaData(
+        long_name="root mean square error of predictand",
+        units="K",
+    ),
+    "predictand_r_2": MetaData(
+        long_name="coefficient of determination",
+        units="1",
+    ),
     "coefficient_mvr": MetaData(
         long_name="multi variate regression coefficients",
         units="K/K",
